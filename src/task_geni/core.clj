@@ -60,7 +60,6 @@
   )
 
 (defn -main [& _]
-  (println "=====================================================")
   (println "Starting app ...")
 
   (def data-path "data/iris_dataset_label.csv")
@@ -73,13 +72,64 @@
   (def df-training (first df-split))
   (def df-test (second df-split))
 
+  (println "Random Forest Regressor")
   (println (g/count df-training))
 
-;;  (def model
-;;    (ml/fit df (ml/k-means {:k 3 :seed 1}) ) )
-;;
+  (def assembler
+  (ml/vector-assembler {:input-cols [:A
+                                     :B
+                                     :C
+                                     :D]
+                        :output-col :raw-features
+                        :handle-invalid "skip"}))
+
+  (def scaler
+    (ml/standard-scaler {:input-col :raw-features
+                         :output-col :features
+                         :with-mean true
+                         :with-std true
+                         }))
+
+  (def random-forest
+  (ml/random-forest-regressor {:label-col :CLASS
+                               :features-col :features}))
+
+  (def pipeline
+    (ml/pipeline assembler scaler random-forest))
+
+  (def pipeline-model
+    (ml/fit df-training pipeline))
+
+  (def predictions
+    (-> df-test
+        (ml/transform pipeline-model)
+        (g/select :prediction :CLASS)
+        (g/with-column :error (g/- :prediction :CLASS))
+        ))
+
+  (-> predictions g/show)
+
+  (let [evaluator
+        (ml/regression-evaluator {:label-col :CLASS
+                                          :metric-name "mae"})]
+  (println (format "MAE: %.2f" (ml/evaluate predictions evaluator))))
+
+
+  (println "KMEANS Clustering")
+
+  (def df-nolabel
+    (-> df (g/select :A :B :C :D)))
+
+  (-> df-nolabel g/show)
+
+  (def model
+    (ml/fit df-nolabel (ml/k-means {:k 3
+                                    :seed 1
+                                    :features-col :features
+                                    })))
+
 ;;  (def predicts
-;;    (ml/transform df model))
+;;    (ml/transform df-nolabel model))
 ;;
 ;;  (def silhoutte
 ;;    (ml/evaluate predicts (ml/clustering-evaluator {}) ) )
