@@ -1,0 +1,7 @@
+exit
+lein repl
+exit
+@spark
+exit
+run
+exit
