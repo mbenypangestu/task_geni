@@ -66,19 +66,25 @@
   (def data-path "data/iris_dataset_label.csv")
   (def df
     (g/read-csv! data-path {:delimiter "," :encoding "ISO-8859-1"}))
-
+  (g/print-schema df)
   (-> df g/show)
 
-  (def model
-    (g/fit df (ml/k-means {:k 3 :seed 1}) ) )
+  (def df-split (g/random-split df [0.8 0.2] 1234))
+  (def df-training (first df-split))
+  (def df-test (second df-split))
 
-  (def predicts
-    (ml/transform df model))
+  (println (g/count df-training))
 
-  (def silhoutte
-    (ml/evaluate predicts (ml/clustering-evaluator {}) ) )
-
-  (println "Centroid : " (ml/cluster-centers model))
+;;  (def model
+;;    (ml/fit df (ml/k-means {:k 3 :seed 1}) ) )
+;;
+;;  (def predicts
+;;    (ml/transform df model))
+;;
+;;  (def silhoutte
+;;    (ml/evaluate predicts (ml/clustering-evaluator {}) ) )
+;;
+;;  (println "Centroid : " (ml/cluster-centers model))
 
   (System/exit 0) )
 
