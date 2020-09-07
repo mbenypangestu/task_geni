@@ -125,16 +125,16 @@
   (def model
     (ml/fit df-nolabel (ml/k-means {:k 3
                                     :seed 1
-                                    :features-col :features
+                                    :features-col (:A :B :C :D)
                                     })))
 
-;;  (def predicts
-;;    (ml/transform df-nolabel model))
-;;
-;;  (def silhoutte
-;;    (ml/evaluate predicts (ml/clustering-evaluator {}) ) )
-;;
-;;  (println "Centroid : " (ml/cluster-centers model))
+  (def predicts
+    (ml/transform df-nolabel model))
+
+  (def silhoutte
+    (ml/evaluate predicts (ml/clustering-evaluator {}) ) )
+
+  (println "Centroid : " (ml/cluster-centers model))
 
   (System/exit 0) )
 
